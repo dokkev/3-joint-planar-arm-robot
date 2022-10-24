@@ -46,7 +46,7 @@ q_initial = np.array([2, 1.0472, 1.0472])
 
 # end effector position inital values
 X_inital = forward_kinematics(q_initial[0],q_initial[1],q_initial[2])
-print(X_inital)
+
 
 # end effector position final values
 X_final = np.array([0,0.7])
@@ -54,8 +54,6 @@ X_final = np.array([0,0.7])
 
 # time span
 tspan = np.linspace(0, 1, 30)
-
-
 
 # before starting the loop, set the initial values
 q = q_initial
