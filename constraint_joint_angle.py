@@ -74,14 +74,12 @@ for t in tspan:
     J22 = L2*np.cos(q[0]+q[1]) + L3*np.cos(q[0]+q[1]+q[2])
     J23 = L3*np.cos(q[0]+q[1]+q[2])
 
-    J = np.array([[J11,J12,J13],[J21,J22,J23],[1,1,1]])
+    J = np.array([[J11,J12,J13],[J21,J22,J23]])
     
 
     # pseudoinverse of Jacobian matrix
     J_pinv = np.linalg.pinv(J)
 
-
-    
     # bell-shaped velocity profile vp to produce staright trajectory
     # movement duration, T
     T = tspan[-1]
@@ -90,11 +88,32 @@ for t in tspan:
     A = 1
     vp = (tn**2-2*tn+1)*30*A*tn**2/T
 
+    # nullspace matrix N where J*qdot = 0
+    N = np.eye(3) - np.dot(J_pinv,J)
+
+    # to aviod joint limit q_max and q_min
+    q_max = np.array([3.14, 2.09, 2.09])
+    q_min = np.array([-3.14, -2.09, -2.09])
+
+    # then create q_star of the range of q_max and q_min
+    q_star = (q_max + q_min)/2
+    
+    # then define delta q, dq
+    dq = q - q_star
+
+    # cost function, V
+    V = np.dot(dq.T,dq)
+
+    # then define the gain, K
+    K = 0.1
+
     # end effector velocity
     X_dot = vp*((X_final-X)/tspan[-1])
     # add 1 element to X_dot to match the shape of J_pinv
-    X_dot = np.append(X_dot,0)
 
+    # joint velocity
+    q_dot = np.dot(J_pinv,X_dot) + np.dot(N,K*dq)
+    
 
     # calculate qdot using pseudoinverse of Jacobian matrix times the end effector velocity
     q_dot = J_pinv.dot(X_dot)
